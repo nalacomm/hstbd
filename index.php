@@ -26,25 +26,40 @@ $buildData ["assetsDir"] = $buildData ["baseUrl"] . "assets/";
 $buildData ["imageDir"] = $buildData ["baseUrl"] . "image/";
 $buildData ["defaultTitle"] ="Check out what the Hubble Space Telescope looked at on my birthday! #Hubble30";
 $router = new \Bramus\Router\Router();
+
 $router->set404(function () {
     global $buildData;
     header($_SERVER['SERVER_PROTOCOL'] . ' 404 Not Found');
     $buildData["view"] = "404";
     render404($buildData);
 });
+
 $router->get('/image/(.*).jpg', function ($values = null) {
     global $buildData;
-    $buildData["month-date"] = $values;
-    renderImage($buildData);
+    $buildData["month-date"] = validatedInputResult($values);
+    if($buildData["month-date"] === false){
+        $buildData["view"] = "404";
+        render404($buildData);
+    } else  {
+        renderImage($buildData);
+    }
 });
-$router->get('/(.*)', function ($values = null) {
-    global $buildData;
-    $buildData["month-date"] = $values;
-    renderApp($buildData);
-});
+
 $router->get('/', function () {
     global $buildData;
     renderApp($buildData);
 });
+
+$router->get('/(.*)', function ($values = null) {
+    global $buildData;
+    $buildData["month-date"] = validatedInputResult($values);
+    if($buildData["month-date"] === false){
+        $buildData["view"] = "404";
+        render404($buildData);
+    } else  {
+        renderApp($buildData);
+    }
+});
+
 $router->run();
 
